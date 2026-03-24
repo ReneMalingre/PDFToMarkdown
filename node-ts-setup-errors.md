@@ -105,11 +105,11 @@ test: {
 
 ## Final verification results
 
-| Command | Result |
-|---|---|
-| `npm run typecheck` | Passed |
-| `npm run lint` | Passed |
+| Command                | Result                                                     |
+| ---------------------- | ---------------------------------------------------------- |
+| `npm run typecheck`    | Passed                                                     |
+| `npm run lint`         | Passed                                                     |
 | `npm run format:check` | Passed (after running `npm run format` to fix quote style) |
-| `npm run build` | Passed — produced `dist/index.js` |
-| `npm run test:run` | Passed |
-| `node dist/index.js` | Passed — printed `Hello, world!` |
+| `npm run build`        | Passed — produced `dist/index.js`                          |
+| `npm run test:run`     | Passed                                                     |
+| `node dist/index.js`   | Passed — printed `Hello, world!`                           |

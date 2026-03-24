@@ -1,7 +1,9 @@
 import 'dotenv/config';
+import { createApp } from './server.js';
 
-function main(): void {
-  console.log('Hello, world!');
-}
+const PORT = Number(process.env.PORT ?? 3000);
 
-main();
+const app = createApp();
+app.listen(PORT, () => {
+  console.log(`PDFToMarkdown running at http://localhost:${PORT}`);
+});

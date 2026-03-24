@@ -6,32 +6,52 @@ Read this document before generating or modifying any code.
 
 ## Purpose
 
-[Describe what this application does and the problem it solves]
+A local web application that converts PDF files to Markdown using the [`@opendataloader/pdf`](https://www.npmjs.com/package/@opendataloader/pdf) library. The user selects or drags a PDF into a browser interface, the server converts it, and the result is displayed for copying or downloading as a `.md` file.
 
 ---
 
 ## Architecture
 
-[Describe the high-level structure — key modules, how they interact, data flow]
+```
+Browser (public/)
+  └── POST /api/convert (multipart, field: pdf)
+        │
+Express server (src/server.ts)
+  └── multer: saves upload to OS temp dir as .pdf
+        │
+Converter service (src/services/converter.ts)
+  └── @opendataloader/pdf: writes .md to a unique temp dir
+        │
+        └── reads .md file → returns string → cleans up temp dir
+```
+
+**Key files:**
+
+| File                        | Responsibility                                         |
+| --------------------------- | ------------------------------------------------------ |
+| `src/index.ts`              | Entry point — starts the Express server                |
+| `src/server.ts`             | Routes, multer upload config, error handler middleware |
+| `src/services/converter.ts` | Wraps `@opendataloader/pdf`, manages temp dirs         |
+| `public/index.html`         | Single-page UI                                         |
+| `public/style.css`          | Styles                                                 |
+| `public/app.js`             | Fetch, drag-and-drop, copy, download                   |
 
 ---
 
 ## Configuration
 
-[List environment variables and configuration keys, their purpose, and valid values]
-
-| Variable | Required | Description |
-| --- | --- | --- |
-| `ANTHROPIC_API_KEY` | Yes | API key for Claude |
+| Variable | Required | Description                              |
+| -------- | -------- | ---------------------------------------- |
+| `PORT`   | No       | HTTP port to listen on (default: `3000`) |
 
 ---
 
 ## Open decisions
 
-[List unresolved design questions here]
-
 ---
 
 ## Resolved decisions
 
-[Move items here from Open decisions once resolved, with rationale]
+- **No framework for the frontend** — plain HTML/CSS/JS is sufficient; avoids a build step for the static assets.
+- **Images excluded from output** — `imageOutput: 'off'` keeps the markdown self-contained and avoids managing image files.
+- **50 MB upload limit** — reasonable ceiling for typical PDFs; configurable via multer `limits`.

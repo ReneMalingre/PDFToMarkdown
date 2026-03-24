@@ -111,6 +111,7 @@ Replace the entire file generated above. Use the directory name as the `"name"` 
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import prettier from 'eslint-config-prettier';
+import globals from 'globals';
 
 export default tseslint.config(
   js.configs.recommended,
@@ -122,6 +123,14 @@ export default tseslint.config(
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/explicit-function-return-type': 'warn',
       '@typescript-eslint/no-explicit-any': 'warn',
+    },
+  },
+  {
+    // Browser globals for any plain JS served to the browser (e.g. public/**/*.js).
+    // Without this, ESLint reports `document`, `fetch`, `navigator` etc. as undefined.
+    files: ['public/**/*.js'],
+    languageOptions: {
+      globals: globals.browser,
     },
   },
   {
@@ -253,7 +262,7 @@ dist/
 
 ### `CLAUDE.md`
 
-`````markdown
+````markdown
 # CLAUDE.md
 
 This file provides guidance to Claude Code when working with this repository.
@@ -309,11 +318,11 @@ import type { Bar } from '../types/index.js';
 
 **Keep `docs/design.md` current — update the relevant section(s) whenever the trigger applies:**
 
-| Trigger | Section(s) to update |
-| --- | --- |
-| New design decision made or question resolved | Open decisions / Resolved decisions |
-| Architecture changes (new module, renamed directory, changed responsibility) | Architecture |
-| New environment variable or configuration key added | Configuration |
+| Trigger                                                                      | Section(s) to update                |
+| ---------------------------------------------------------------------------- | ----------------------------------- |
+| New design decision made or question resolved                                | Open decisions / Resolved decisions |
+| Architecture changes (new module, renamed directory, changed responsibility) | Architecture                        |
+| New environment variable or configuration key added                          | Configuration                       |
 
 ## Architecture
 
@@ -322,7 +331,7 @@ import type { Bar } from '../types/index.js';
 ## Conventions
 
 [Note any project-specific patterns to follow — naming, error handling, logging, etc.]
-`````
+````
 
 ---
 
@@ -377,7 +386,7 @@ Run these commands in order:
 
 ```bash
 npm install --save-dev typescript@^5 @types/node
-npm install --save-dev eslint @eslint/js typescript-eslint eslint-config-prettier prettier
+npm install --save-dev eslint @eslint/js typescript-eslint eslint-config-prettier prettier globals
 npm install --save-dev tsx nodemon rimraf tsc-alias
 npm install --save-dev vitest
 npm install dotenv

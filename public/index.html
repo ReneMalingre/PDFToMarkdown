@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PDF to Markdown</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main>
+      <h1>PDF to Markdown</h1>
+
+      <section class="upload-section">
+        <label for="pdf-input" class="drop-zone" id="drop-zone">
+          <span id="file-label-text">Choose a PDF or drag it here</span>
+          <input type="file" id="pdf-input" accept=".pdf,application/pdf" />
+        </label>
+        <button id="convert-btn" disabled>Convert</button>
+      </section>
+
+      <p class="status" id="status" hidden></p>
+
+      <section class="output-section" id="output-section" hidden>
+        <div class="output-header">
+          <h2>Markdown output</h2>
+          <div class="output-actions">
+            <button id="copy-btn">Copy</button>
+            <button id="download-btn">Download .md</button>
+          </div>
+        </div>
+        <textarea id="output" readonly></textarea>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

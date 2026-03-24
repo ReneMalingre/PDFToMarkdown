@@ -53,16 +53,21 @@ import type { Bar } from '../types/index.js';
 
 **Keep `docs/design.md` current — update the relevant section(s) whenever the trigger applies:**
 
-| Trigger | Section(s) to update |
-| --- | --- |
-| New design decision made or question resolved | Open decisions / Resolved decisions |
-| Architecture changes (new module, renamed directory, changed responsibility) | Architecture |
-| New environment variable or configuration key added | Configuration |
+| Trigger                                                                      | Section(s) to update                |
+| ---------------------------------------------------------------------------- | ----------------------------------- |
+| New design decision made or question resolved                                | Open decisions / Resolved decisions |
+| Architecture changes (new module, renamed directory, changed responsibility) | Architecture                        |
+| New environment variable or configuration key added                          | Configuration                       |
 
 ## Architecture
 
-[Describe the purpose of each directory in src/ as the project grows]
+- `src/index.ts` — entry point; starts the Express server
+- `src/server.ts` — Express app, routes, multer file upload, error handler
+- `src/services/converter.ts` — calls `@opendataloader/pdf`, manages temp dirs, returns markdown string
+- `public/` — static frontend (HTML/CSS/JS); served by Express
 
 ## Conventions
 
-[Note any project-specific patterns to follow — naming, error handling, logging, etc.]
+- Conversion always uses a unique temp directory per request, cleaned up in a `finally` block
+- Route handlers pass errors to the Express error middleware rather than handling them inline
+- The `quiet: true` option is always passed to `convert()` to suppress library console output
