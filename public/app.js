@@ -7,6 +7,7 @@ const outputSection = document.getElementById('output-section');
 const output = document.getElementById('output');
 const copyBtn = document.getElementById('copy-btn');
 const downloadBtn = document.getElementById('download-btn');
+const downloadDocxBtn = document.getElementById('download-docx-btn');
 
 let selectedFile = null;
 
@@ -90,12 +91,59 @@ copyBtn.addEventListener('click', async () => {
 downloadBtn.addEventListener('click', () => {
   const baseName = (selectedFile?.name ?? 'output').replace(/\.pdf$/i, '');
   const blob = new Blob([output.value], { type: 'text/markdown' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${baseName}.md`;
-  a.click();
-  URL.revokeObjectURL(url);
+  triggerDownload(blob, `${baseName}.md`);
+});
+
+downloadDocxBtn.addEventListener('click', async () => {
+  const markdown = output.value;
+  if (!markdown) {
+    showError('Nothing to export yet. Convert a PDF first.');
+    return;
+  }
+
+  const baseName = (selectedFile?.name ?? 'output').replace(/\.pdf$/i, '');
+  const filename = `${baseName}.docx`;
+
+  downloadDocxBtn.disabled = true;
+  const oldLabel = downloadDocxBtn.textContent;
+  downloadDocxBtn.textContent = 'Exporting\u2026';
+  showInfo('Generating Word document\u2026');
+
+  try {
+    const res = await fetch('/api/export-docx', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        markdown,
+        filename,
+        title: baseName,
+        subject: 'PDF to Markdown export',
+        creator: 'PDFToMarkdown',
+      }),
+    });
+
+    if (!res.ok) {
+      let message = 'DOCX export failed.';
+      try {
+        const data = await res.json();
+        message = data.error ?? message;
+      } catch {
+        // Fall through and use default message if response is not JSON.
+      }
+
+      showError(message);
+      return;
+    }
+
+    const blob = await res.blob();
+    triggerDownload(blob, filename);
+    clearStatus();
+  } catch {
+    showError('Network error while exporting DOCX.');
+  } finally {
+    downloadDocxBtn.disabled = false;
+    downloadDocxBtn.textContent = oldLabel;
+  }
 });
 
 // ── Status helpers ────────────────────────────────────────────────────────────
@@ -115,4 +163,13 @@ function showError(msg) {
 function clearStatus() {
   statusEl.hidden = true;
   statusEl.textContent = '';
+}
+
+function triggerDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
 }

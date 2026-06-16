@@ -5,6 +5,7 @@ import { tmpdir } from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { convertPdfToMarkdown } from './services/converter.js';
+import { DOCX_MIME_TYPE, markdownToDocx, sanitiseDocxFilename } from './services/markdownDocx.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -31,6 +32,7 @@ export function createApp(): express.Application {
   const app = express();
 
   app.use(express.static(path.join(__dirname, '..', 'public')));
+  app.use(express.json({ limit: '2mb' }));
 
   app.post('/api/convert', upload.single('pdf'), async (req, res) => {
     if (!req.file) {
@@ -47,6 +49,41 @@ export function createApp(): express.Application {
       res.status(500).json({ error: message });
     } finally {
       await unlink(filePath).catch(() => {});
+    }
+  });
+
+  app.post('/api/export-docx', async (req, res) => {
+    const { markdown, filename, title, subject, creator } = req.body as {
+      markdown?: unknown;
+      filename?: unknown;
+      title?: unknown;
+      subject?: unknown;
+      creator?: unknown;
+    };
+
+    if (typeof markdown !== 'string') {
+      res.status(400).json({ error: 'markdown must be provided as a string' });
+      return;
+    }
+
+    try {
+      const docx = await markdownToDocx(markdown, {
+        filename: typeof filename === 'string' ? filename : undefined,
+        title: typeof title === 'string' ? title : undefined,
+        subject: typeof subject === 'string' ? subject : undefined,
+        creator: typeof creator === 'string' ? creator : undefined,
+      });
+
+      const safeFilename = sanitiseDocxFilename(
+        typeof filename === 'string' ? filename : 'document.docx'
+      );
+
+      res.setHeader('Content-Type', DOCX_MIME_TYPE);
+      res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}"`);
+      res.status(200).send(docx);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'DOCX export failed';
+      res.status(500).json({ error: message });
     }
   });
 
